@@ -1,0 +1,44 @@
+# Версия docker-compose
+version: '3.8'
+# Список наших серверов (контейнеров)
+services:
+  php:
+    container_name: keywords
+    image: keywords_php
+    build:
+      context: .
+      dockerfile: ./images/php/Dockerfile
+    volumes:
+      - ../:/var/www/html
+    ports:
+      - 82:80
+      - 444:443
+    environment:
+      - NETTE_DEBUG=1
+    links:
+      - db
+
+  db:
+    container_name: keywords_db
+    image: keywords_db
+    build:
+      context: .
+      dockerfile: ./images/mysql/Dockerfile
+    ports:
+      - 3308:3306
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_USER: anton
+      MYSQL_PASSWORD: 1195286
+      MYSQL_DATABASE: markets
+    volumes:
+      - ./images/mysql/markets.sql:/docker-entrypoint-initdb.d/markets.sql
+
+  phpmyadmin:
+    image: phpmyadmin:latest
+    ports:
+      - 8083:80
+    environment:
+      - PMA_HOST=db
+      - PMA_USER=anton
+      - PMA_PASSWORD=1195286

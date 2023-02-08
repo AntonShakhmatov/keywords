@@ -1,0 +1,1 @@
+docker-compose -p keywords up -d --build --force-recreate
