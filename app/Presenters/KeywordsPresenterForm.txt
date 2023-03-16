@@ -1,0 +1,208 @@
+<?php
+
+namespace App\Presenters;
+
+use Nette;
+use Nette\Http\Request;
+use App\Model\KeywordsModel;
+use Nette\Utils\Json;
+use Nette\Application\UI\Form;
+use App\Presenters\BasePresenter;
+
+class KeywordsPresenter extends BasePresenter
+
+{
+    /**
+     * @param KeywordsModel
+     */
+    private $model;
+
+    /**
+     * @param Form
+     */
+    private $form;
+
+    public function __construct(KeywordsModel $model, Form $form)
+    {
+        parent::__construct();
+        $this->model = $model;
+        $this->form = $form;
+    }
+
+    /**
+     * @param Json
+     */
+    private $json;
+
+    /**
+     * @param Request
+     */
+    private $httpRequest;
+    
+    public function createComponentKeywordsForm():Form
+    {
+        // $query = $httpRequest->getQuery('query');
+        $keywords = $this->model->database->table('words');
+        foreach ($keywords as $value) {
+            $keyword = $value->keywords;
+        $form = new Form;
+        $text = $form->addTextArea('text')
+            ->setHtmlAttribute('id', 'live_search')
+            ->setHtmlAttribute('placeholder', 'Textarea');
+        // if($this->httpRequest->getQuery('query') !== null){
+        // $value = $form->getValues();
+        $text = $this->model->database->table('words')->select($keyword)->where('keywords', $text);
+        $form->addSubmit('submit', 'Send')
+            ->setHtmlAttribute('id','search');
+        echo json_encode($text);
+        $form->onSuccess[] = [$this, 'recordFormSucceeded'];
+        // $form->onError[] = function (Form $form) {
+        //     // if ($this->presenter->isAjax()) {
+        //     //             $this->redrawControl('keywords_form');
+        //     // }
+        // };
+    // }
+        return $form;
+    }
+
+    }
+
+    public function recordFormSucceeded(Form $form)
+    {
+        // $this->flashMessage('Текст принят.');
+        $value = $form->getValues();
+        echo $value->text;
+    }
+
+}
+
+<script>
+	$(document).ready(function(){
+		
+		$('#live_search').tokenfield({
+			autocomplete :{
+				source: function(request, response)
+				{
+ 					jQuery.get('http://localhost/keywords/key', {
+		  				query : request.term
+					}, 
+					function(data){
+						data = JSON.parse(data);
+						console.log(data);
+						response(data);
+				}); 
+				},
+				delay: 100
+			},
+			showAutocompleteOnFocus: true
+		});
+		$('#search').click(function(){
+        $('#keywords').text($('#live_search').val());
+		});
+	});
+</script>
+
+2)
+
+public function createComponentLocalForm()
+	{
+ 	$form = new Form;
+  	$form->addSelect('locale_id', 'Vyberte oblast:', $this->getLocale())
+       ->setRequired();
+ 	$form->addSubmit('send', 'Předat');
+	$form->onSubmit[];
+  	$form->onSuccess[] = [$this, 'formLocaleSucceeded'];
+  	return $form;
+	}
+
+
+  public function formLocaleSucceeded(Form $form, $values)
+  {
+
+    $this->database->table('contacts')->get($values['id'])->update(['locale_id'=>$values->locale_id]);
+	$this->flashMessage('Kontakt přesunut');
+	$this->redirect('this');
+  }
+
+<form action="{link Admin:kontakty}" method="post">
+  <input style = "font-size:small" type="submit" value="Předat" class="btn btn-primary">
+  <input type="hidden" value="{$row->contact_id}" id="id" name="id" >
+   <select  style = "font-size:small" class="select" name="locale_id">
+     {foreach $locales as $locale}
+          <option  style = "font-size:small" value="{$locale->locale_id}" {if $locale->locale_id == $row->cli}selected{/if}>{$locale->locale_name}</option>
+     {/foreach}
+   </select>
+
+ </form>
+
+3)
+
+//	const fieldForText = document.querySelector('#live_search')
+//	const clickMeButton = document.querySelector('#click-me');
+//	const resultBlock = document.querySelector('#result');
+//	fieldForText.addEventListener("input", makeRequest);
+
+	$( "#live_search" ).autocomplete({
+		source: function(request, response) {
+			$.ajax({
+				url:'http://localhost/keywords/key',
+				type: "get",
+				dataType: 'json',
+				cache: true,
+				success: function(data){
+//				$("#result").show();
+//				$("#result").html(response(data));
+				$('#live_search').tokenfield({
+					autocomplete: {
+						source: data,
+						delay: 100
+					},
+					showAutocompleteOnFocus: true
+				})
+//				$('#result').tokenfield('setTokens', data.join(','));
+				}
+			});
+		}
+	});
+
+4)
+
+		$(document).ready(function(){
+			$('#live_search').tokenfield({
+				autocomplete:{
+					source: 'http://localhost/keywords/key',
+					delay:100
+				},
+//				function (data) {
+//				data = $.parseJSON(data);
+//				response(data);
+			});
+				showAutocompleteOnFocus: true
+			});
+
+
+ajax autocomplete: 
+
+  <script src="https://nette.github.io/resources/js/3/netteForms.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-tokenfield/0.12.0/bootstrap-tokenfield.js"></script>
+
+	<script>
+		$(document).ready(function(){
+			$('#live_search').tokenfield({
+				autocomplete:{
+					source: 'http://localhost/keywords/key',
+					type: 'GET',
+                    cache: false,
+					delay:100
+				},
+				success: function(data) {
+				data = $.parseJSON(data);
+				response(data);
+				console.log(data);
+				}
+			});
+				showAutocompleteOnFocus: false
+			});
+	</script>

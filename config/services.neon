@@ -8,3 +8,8 @@ search:
 
 services:
 	- App\Router\RouterFactory::createRouter
+	- Nette\Application\UI\Form
+	- App\Model\KeywordsModel
+	- App\Model\FetchModel
+	- Nette\Mail\Message
+	- App\Presenters\MailPresenter(%contactEmail%)
