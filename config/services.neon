@@ -8,6 +8,7 @@ search:
 
 services:
 	- App\Router\RouterFactory::createRouter
+	- App\Services\MyAuthenticator
 	- Nette\Application\UI\Form
 	- App\Model\KeywordsModel
 	- App\Model\FetchModel

@@ -5,6 +5,7 @@ namespace App\Model;
 use Nette;
 use Nette\Database\Connection;
 use Nette\Database\Explorer;
+use Nette\Security\Passwords;
 
 class FetchModel{
 
@@ -18,9 +19,14 @@ class FetchModel{
      */
     public $database;
 
-    public function __construct(Connection $connection, Explorer $database){
+    /**
+     * @param Passwords
+     */
+    public $passwords;
+    public function __construct(Connection $connection, Explorer $database, Passwords $passwords){
         $this->connection = $connection;
         $this->database = $database;
+        $this->passwords = $passwords;
     }
 
 }

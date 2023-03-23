@@ -36,7 +36,7 @@ class KeywordsPresenter extends BasePresenter
                 $keywords[] = strtolower($val->keywords);
             }
 
-            $queryWords = explode(' ', strtolower(trim($query)));
+            $queryWords = explode(' ', strtolower($query));
 
             $matches = [];
             foreach ($keywords as $keyword) {
@@ -44,15 +44,16 @@ class KeywordsPresenter extends BasePresenter
                 foreach ($queryWords as $queryWord) {
                     if (strpos($keyword, $queryWord) !== false) { 
                         $matchedWords[] = $queryWord;
+                        $matches[] = $keyword;
                     }
                 }
-                if (count($matchedWords) == count($queryWords)) { // check if all query words are matched in the keyword
-                    $matches[] = $keyword;
-                }
+                // if (count($matchedWords) == count($queryWords)) { 
+                //     $matches[] = $keyword;
+                // }
             }
             return $matches;
         });
-        $autocompleteInput->setAutocompleteMinLength(1); // set minimum input length to trigger autocomplete
+        $autocompleteInput->setAutocompleteMinLength(1); //input length
 
         return $form;
     }
