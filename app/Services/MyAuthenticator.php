@@ -3,7 +3,7 @@
 namespace App\Services;
 
 use Nette;
-use Nette\Security\SimpleIdentity;
+use Nette\Security\Identity;
 use Nette\Security\Authenticator;
 use Nette\Security\AuthenticationException;
 use App\Model\FetchModel;
@@ -19,32 +19,25 @@ class MyAuthenticator implements Authenticator
         $this->model = $model;
 	}
 
-	public function authenticate($username, $password): SimpleIdentity
+	public function authenticate($username, $password): Identity
 	{
-		$row = $this->model->database->table('users')
+		$row = $this->model->context->table('users')
 			->where('login', $username)
+			// ->where('password', $password)
 			->fetch();
 
 		if (!$row) {
 			throw new AuthenticationException('User not found.');
 		}
 
-        // $pass = $this->model->database->table('users')
-        //     ->where('password', $password)
-        //     ->fetch();
-
-        // if (!$pass) {
-        //     throw new AuthenticationException('Invalid password.');
-        // }
-
 		if (!$this->model->passwords->verify($password, $row->password)) {
 			throw new AuthenticationException('Invalid password.');
 		}
 
-		return new SimpleIdentity(
+		return new Identity(
 			$row->id,
-			$row->role, // или массив ролей
-			['name' => $row->username],
+			$row->role,
+			['username' => $row->login],
 		);
 	}
 }

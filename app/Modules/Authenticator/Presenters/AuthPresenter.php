@@ -5,7 +5,8 @@ namespace App\Modules\Authenticator\Presenter;
 use Nette;
 use App\Presenters\BasePresenter;
 use App\Services\MyAuthenticator;
-use Nette\Forms\Form;
+// use Nette\Forms\Form;
+use Nette\Application\UI\Form;
 
 class AuthPresenter extends BasePresenter{
     
@@ -21,11 +22,11 @@ class AuthPresenter extends BasePresenter{
         $this->auth = $auth;
     }
 
-    protected function createComponentSignInForm(): Form
+    protected function createComponentLogInForm(): Form
 	{
 		$form = new Form;
-		$username = $form->addText('name', 'Name:');
-		$password = $form->addPassword('password', 'Password:');
+		$form->addText('name', 'Name:');
+		$form->addPassword('password', 'Password:');
 		$form->addSubmit('send', 'Sign up');
 		$form->onSuccess[] = [$this, 'formSucceeded'];
 		return $form;
@@ -35,11 +36,12 @@ class AuthPresenter extends BasePresenter{
 	{
         $this->username = $data->name;
         $this->password = $data->password;
+        $this->auth->authenticate($data->name, $data->password);
 		$this->flashMessage('You have successfully signed up.');
 		$this->redirect('Auth:');
 	}
 
     public function renderDefault(){
-        $this->auth->authenticate($this->username, $this->password);
+        $this->template->form = $this['logInForm'];
     }
 }

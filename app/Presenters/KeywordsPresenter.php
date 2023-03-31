@@ -43,13 +43,9 @@ class KeywordsPresenter extends BasePresenter
                 $matchedWords = [];
                 foreach ($queryWords as $queryWord) {
                     if (strpos($keyword, $queryWord) !== false) { 
-                        $matchedWords[] = $queryWord;
                         $matches[] = $keyword;
                     }
                 }
-                // if (count($matchedWords) == count($queryWords)) { 
-                //     $matches[] = $keyword;
-                // }
             }
             return $matches;
         });
