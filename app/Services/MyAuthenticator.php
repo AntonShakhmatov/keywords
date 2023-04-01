@@ -29,7 +29,7 @@ class MyAuthenticator implements Authenticator
 		if (!$row) {
 			throw new AuthenticationException('User not found.');
 		}
-
+		
 		if (!$this->model->passwords->verify($password, $row->password)) {
 			throw new AuthenticationException('Invalid password.');
 		}

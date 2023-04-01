@@ -10,8 +10,6 @@ services:
 	- App\Router\RouterFactory::createRouter
 	- App\Services\MyAuthenticator
 	- Nette\Application\UI\Form
-	- App\Model\KeywordsModel
 	- App\Model\FetchModel
-	- App\Model\AuthModel
 	- Nette\Mail\Message
 	- App\Presenters\MailPresenter(%contactEmail%)

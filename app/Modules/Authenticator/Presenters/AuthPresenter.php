@@ -37,8 +37,8 @@ class AuthPresenter extends BasePresenter{
         $this->username = $data->name;
         $this->password = $data->password;
         $this->auth->authenticate($data->name, $data->password);
-		$this->flashMessage('You have successfully signed up.');
-		$this->redirect('Auth:');
+		$this->redirect('Keywords:default');
+        $this->flashMessage('You have successfully signed up.');
 	}
 
     public function renderDefault(){

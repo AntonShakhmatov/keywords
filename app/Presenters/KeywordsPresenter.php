@@ -4,7 +4,7 @@ namespace App\Presenters;
 
 use Nette;
 use Nette\Http\Request;
-use App\Model\KeywordsModel;
+use App\Model\FetchModel;
 use Nette\Utils\Json;
 use Nette\Application\UI\Form;
 use App\Presenters\BasePresenter;
@@ -12,7 +12,7 @@ use App\Presenters\BasePresenter;
 class KeywordsPresenter extends BasePresenter
 {
     /**
-    * @param KeywordsModel 
+    * @param FetchModel 
     */
     private $model;
 
@@ -21,7 +21,7 @@ class KeywordsPresenter extends BasePresenter
      */
     private $form;
 
-    public function __construct(KeywordsModel $model){
+    public function __construct(FetchModel $model){
      $this->model = $model;
     }
 
