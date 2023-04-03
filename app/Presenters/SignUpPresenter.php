@@ -3,22 +3,21 @@
 namespace App\Presenters;
 
 use Nette;
+use Nette\Http\Request;
+use Nette\Http\Response;
 use Nette\Application\UI\Form;
 use App\Model\FetchModel;
-use App\Presenters\BasePresenter;
+// use App\Presenters\BasePresenter;
+use Nette\Application\UI\Presenter;
 
-class SignUpPresenter extends BasePresenter{
-
-    /**
-     * @param FetchModel 
-     */
-    /**
-     * @var Passwords
-     */
-    private $passwords;
+class SignUpPresenter extends Presenter{
     private $model;
-    public function __construct(FetchModel $model){
+    private $httpResponse;
+    private $token;
+    public function __construct(FetchModel $model, Response $httpResponse){
+        parent::startup();
         $this->model = $model;
+        $this->httpResponse = $httpResponse;
     }
 
     protected function createComponentForm()
@@ -31,22 +30,16 @@ class SignUpPresenter extends BasePresenter{
 		$form->addSubmit('register', 'Register');
 
 		$form->onSuccess[] = function() use ($form) {
+            $this->token =  bin2hex(random_bytes(32));
 			$values = $form->getValues();
 			$this->model->context->table('users')->insert([
 				'login' => $values->email,
 				'password' => $this->model->passwords->hash($values->pwd2),
-			]);
-		};
-
-		$form->onSuccess[] = function() {
-			$this->redirect('Keywords:default');
-		};
-
-		return $form;
-	}
-
-    public function renderDefault(){
-    //    return $this->template->form;
+                'token' => $this->token
+			]);  
+            $this->httpResponse->addHeader('Authorization', "Bearer {$this->token}");     
+            $this->redirect('Keywords:default');
+		};	
+            return $form;
+        }
     }
-
-}
