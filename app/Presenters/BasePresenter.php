@@ -6,6 +6,7 @@ namespace App\Presenters;
 
 use Nette;
 use Nette\Http\Request;
+use Nette\Http\Response;
 use Nette\Application\UI\Presenter;
 
 /**
@@ -14,12 +15,12 @@ use Nette\Application\UI\Presenter;
  */
 abstract class BasePresenter extends Presenter
 {
-    /**
-     * @param Request
-     */
     private $request;
-    public function __construct(Request $request){
+    private $httpResponse;
+
+    public function __construct(Request $request,  Response $httpResponse){
         $this->request = $request;
+        $this->$httpResponse = $httpResponse;
     }
     protected function startup(): void
     {
@@ -29,5 +30,14 @@ abstract class BasePresenter extends Presenter
             $this->redirect('Auth:default');
         }
     }
+
+    // protected function authorizeUser($name)
+    // {
+    //     $row = $this->database->table('users')
+    //         ->where('login', $name)
+    //         ->select('token')
+    //         ->fetch();
+    //     $this->httpResponse->addHeader('Authorization', "Bearer {$token}");
+    // }
     
 }

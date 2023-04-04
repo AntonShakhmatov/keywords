@@ -47,4 +47,9 @@ class KeywordsPresenter extends BasePresenter
         $autocompleteInput->setAutocompleteMinLength(1); //input length
         return $form;
     }
+
+    public function actionProfile(){
+        $this->authorizeUser($user->name);
+        $this->template->user = $user;
+    }
 }

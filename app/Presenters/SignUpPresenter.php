@@ -7,7 +7,6 @@ use Nette\Http\Request;
 use Nette\Http\Response;
 use Nette\Application\UI\Form;
 use App\Model\FetchModel;
-// use App\Presenters\BasePresenter;
 use Nette\Application\UI\Presenter;
 
 class SignUpPresenter extends Presenter{
@@ -30,15 +29,44 @@ class SignUpPresenter extends Presenter{
 		$form->addSubmit('register', 'Register');
 
 		$form->onSuccess[] = function() use ($form) {
-            $this->token =  bin2hex(random_bytes(32));
-			$values = $form->getValues();
-			$this->model->context->table('users')->insert([
-				'login' => $values->email,
-				'password' => $this->model->passwords->hash($values->pwd2),
-                'token' => $this->token
-			]);  
-            $this->httpResponse->addHeader('Authorization', "Bearer {$this->token}");     
-            $this->redirect('Keywords:default');
+        $value = $form->getValues();
+        $user = $this->model->database->table('users')
+            ->where('login', $value->email)
+            ->select('id')
+            ->fetch();
+
+            if(is_null($user)){
+                $this->token =  bin2hex(random_bytes(32));
+                $login = $value->email;
+                $password = $this->model->passwords->hash($value->pwd2);
+                $userInsertResult = $this->model->context->table('users')->insert([
+                    'login' => $login,
+                    'password' => $password
+                ]);
+                if($userInsertResult){
+                $userId = $userInsertResult->getPrimary();
+
+                $tokenInsert = $this->model->context->table('tokens')->insert([
+                    'token' => $this->token,
+                    'userId' => $userId
+                ]);
+
+                if(!$tokenInsert){
+                    $this->httpResponse->setCode(Response::S403_FORBIDDEN);
+                }
+               
+                }
+                else
+                {
+                    $this->getHttpResponse()->setCode(200);
+                    $this->httpResponse->addHeader('Authorization', "Bearer {$this->token}");     
+                    $this->redirect('Keywords:default');
+                }
+            }
+            else
+            {
+                $this->getHttpResponse()->setCode(303);
+            }  
 		};	
             return $form;
         }

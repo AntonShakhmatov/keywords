@@ -5,10 +5,10 @@ namespace App\Modules\Authenticator\Presenter;
 use Nette;
 use Nette\Application\UI\Form;
 use Nette\Http\Response;
-// use App\Presenters\BasePresenter;
 use Nette\Application\UI\Presenter;
 use App\Services\MyAuthenticator;
 use Nette\Database\Explorer;
+use App\Model\FetchModel;
 
 class AuthPresenter extends Presenter{
     private $username;
@@ -16,11 +16,13 @@ class AuthPresenter extends Presenter{
     private $auth;
     private $httpResponse;
     private $database;
+    private $token;
+    private $model;
 
-    public function __construct(MyAuthenticator $auth, Response $httpResponse, Explorer $database){
+    public function __construct(MyAuthenticator $auth, Response $httpResponse, FetchModel $model){
         $this->auth = $auth;
         $this->httpResponse = $httpResponse;
-        $this->database = $database;
+        $this->model = $model;
     }
 
     protected function createComponentLogInForm(): Form
@@ -35,17 +37,37 @@ class AuthPresenter extends Presenter{
 
     public function formSucceeded(Form $form, $data): void
 	{
-        $row = $this->database->table('users')
+        $row = $this->model->database->table('users')
             ->where('login', $data->name)
-            ->select('token')
+            ->select('id')
             ->fetch();
-        $token = $row['token'];   
-        $this->username = $data->name;
-        $this->password = $data->password;
-        $this->auth->authenticate($data->name, $data->password);
-        $this->httpResponse->addHeader('Authorization', "Bearer {$token}");     
-		$this->redirect(':Keywords:default');
-        $this->flashMessage('You have successfully signed in.');
+
+        if(!is_null($row)){
+            $this->token =  bin2hex(random_bytes(32));
+            $userId = $row['id'];
+
+            $tokenInsert = $this->model->context->table('tokens')->insert([
+                'token' => $this->token,
+                'userId' => $userId
+            ]);
+            if(!$tokenInsert){
+                $this->httpResponse->setCode(Response::S403_FORBIDDEN);
+            }
+            else
+            {
+                $this->getHttpResponse()->setCode(200);
+                $this->auth->authenticate($data->name, $data->password);
+                $this->flashMessage('You have successfully signed in.');
+                $this->httpResponse->addHeader('Authorization', "Bearer {$this->token}");     
+                $this->redirect(':Keywords:default');
+                die();
+            }
+        }
+        else
+        {
+            $this->getHttpResponse()->setCode(303);
+            $this->flashMessage('Invalid login or password');
+        }
 	}
 
     public function renderDefault(){
