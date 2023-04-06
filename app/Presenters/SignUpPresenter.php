@@ -14,7 +14,6 @@ class SignUpPresenter extends Presenter{
     private $httpResponse;
     private $token;
     public function __construct(FetchModel $model, Response $httpResponse){
-        parent::startup();
         $this->model = $model;
         $this->httpResponse = $httpResponse;
     }
@@ -22,54 +21,45 @@ class SignUpPresenter extends Presenter{
     protected function createComponentForm()
 	{
 		$form = new Form();
-
 		$form->addEmail('email', 'Email')->setRequired('Please enter email');
 		$passwordInput = $form->addPassword('pwd', 'Password')->setRequired('Please enter password');
 		$form->addPassword('pwd2', 'Password (verify)')->setRequired('Please enter password for verification')->addRule($form::EQUAL, 'Password verification failed. Passwords do not match', $passwordInput);
 		$form->addSubmit('register', 'Register');
-
-		$form->onSuccess[] = function() use ($form) {
-        $value = $form->getValues();
+		$form->onSuccess[] = [$this, 'formSucceeded'];
+		return $form;
+    }
+    public function formSucceeded(Form $form, $data): void
+    {
         $user = $this->model->database->table('users')
-            ->where('login', $value->email)
+            ->where('login', $data->email)
             ->select('id')
             ->fetch();
 
             if(is_null($user)){
-                $this->token =  bin2hex(random_bytes(32));
-                $login = $value->email;
-                $password = $this->model->passwords->hash($value->pwd2);
+                $token =  bin2hex(random_bytes(32));
+                $login = $data->email;
+                $password = $this->model->passwords->hash($data->pwd2);
                 $userInsertResult = $this->model->context->table('users')->insert([
                     'login' => $login,
                     'password' => $password
                 ]);
+
                 if($userInsertResult){
                 $userId = $userInsertResult->getPrimary();
-
                 $tokenInsert = $this->model->context->table('tokens')->insert([
-                    'token' => $this->token,
+                    'token' => $token,
                     'userId' => $userId
                 ]);
 
-                if(!$tokenInsert){
-                    $this->httpResponse->setCode(Response::S403_FORBIDDEN);
+                if($tokenInsert)
+                {
+                    $expiry = time() + 60 * 60 * 24 * 30;
+                    $this->getHttpResponse()->setCookie('token', $token, $expiry);
+                    $this->redirect('Keywords:default');
+                    exit();
                 }
                
                 }
-                else
-                {
-                    $this->getHttpResponse()->setCode(200);
-                    // $this->httpResponse->addHeader('Authorization', "Bearer {$this->token}");     
-                    $expiry = time() + 60 * 60 * 24 * 30;
-                    $this->getHttpResponse()->setCookie('token', $this->token, $expiry);
-                    $this->redirect('Keywords:default');
-                }
             }
-            else
-            {
-                $this->getHttpResponse()->setCode(303);
-            }  
-		};	
-            return $form;
-        }
     }
+}

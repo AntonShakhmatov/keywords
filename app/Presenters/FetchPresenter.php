@@ -5,27 +5,24 @@ namespace App\Presenters;
 use Nette;
 use App\Presenters\BasePresenter;
 use Nette\Http\Request;
+use Nette\Http\Response;
 use Nette\Application\UI\Form;
 use App\Model\FetchModel;
 
 class FetchPresenter extends BasePresenter
-
 {
-
-/**
- * @param Request
- */    
 private $request;
-
-/**
- * @param FetchModel
- */
 private $model;
 
-public function __construct(FetchModel $model, Request $request){
-    parent::__construct();
+public function __construct(FetchModel $model, Request $request, Response $httpResponse){
+    parent::__construct($request, $httpResponse);
     $this->model = $model;
     $this->request = $request;
+}
+
+protected function startup(): void
+{
+    parent::startup();
 }
 
 protected function createComponentTextForm()

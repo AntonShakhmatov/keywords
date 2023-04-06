@@ -22,6 +22,7 @@ abstract class BasePresenter extends Presenter
         $this->request = $request;
         $this->httpResponse = $httpResponse;
     }
+    
     protected function startup(): void
     {
         parent::startup();
@@ -29,6 +30,6 @@ abstract class BasePresenter extends Presenter
         if ($token) {
             $this->httpResponse->addHeader('Authorization', 'Bearer ' . $token);
         }
-        // var_dump($this->httpResponse->getHeader('Authorization'));
+        var_dump($this->httpResponse->getHeader('Authorization'));
     }    
 }

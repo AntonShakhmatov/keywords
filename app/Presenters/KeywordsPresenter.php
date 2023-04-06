@@ -15,14 +15,15 @@ class KeywordsPresenter extends BasePresenter
     private $model;
     private $form;
 
-    // public function __construct(FetchModel $model){
-    //  parent::startup();
-    //  $this->model = $model;
-    // }
-
     public function __construct(Request $request, Response $httpResponse, FetchModel $model){
         parent::__construct($request, $httpResponse);
-        $this->model = $model;
+        // parent::startup();
+        $this->model = $model;     
+    }
+
+    protected function startup(): void
+    {
+        parent::startup();
     }
 
     public function createComponentAutocompleteForm(): Form

@@ -4,12 +4,15 @@ declare(strict_types=1);
 
 namespace App\Presenters;
 
-use App\Presenters\BasePresenter;
+use Nette;
+use Nette\Http\Response;
+use Nette\Http\Request;
 use Nette\Application\UI\Form;
 use Nette\Mail\Mailer;
 use Nette\Mail\Message;
 use Nette\Mail\SendException;
 use Nette\Utils\ArrayHash;
+use App\Presenters\BasePresenter;
 
 /**
  * Presenter pro kontaktní formulář.
@@ -28,11 +31,16 @@ class MailPresenter extends BasePresenter
      * @param string  $contactEmail kontaktní email
      * @param Mailer $mailer       automaticky injektovaná Nette služba pro odesílání emailů
      */
-    public function __construct(string $contactEmail, Mailer $mailer)
+    public function __construct(string $contactEmail, Mailer $mailer, Request $request, Response $httpResponse)
     {
-        parent::__construct();
+        parent::__construct($request, $httpResponse);
         $this->contactEmail = $contactEmail;
         $this->mailer = $mailer;
+    }
+
+    protected function startup(): void
+    {
+        parent::startup();
     }
 
     /**
