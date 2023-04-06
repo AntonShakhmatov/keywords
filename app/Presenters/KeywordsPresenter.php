@@ -3,6 +3,7 @@
 namespace App\Presenters;
 
 use Nette;
+use Nette\Http\Response;
 use Nette\Http\Request;
 use App\Model\FetchModel;
 use Nette\Utils\Json;
@@ -14,9 +15,14 @@ class KeywordsPresenter extends BasePresenter
     private $model;
     private $form;
 
-    public function __construct(FetchModel $model){
-     parent::startup();
-     $this->model = $model;
+    // public function __construct(FetchModel $model){
+    //  parent::startup();
+    //  $this->model = $model;
+    // }
+
+    public function __construct(Request $request, Response $httpResponse, FetchModel $model){
+        parent::__construct($request, $httpResponse);
+        $this->model = $model;
     }
 
     public function createComponentAutocompleteForm(): Form

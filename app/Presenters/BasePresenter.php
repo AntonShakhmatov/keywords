@@ -20,24 +20,15 @@ abstract class BasePresenter extends Presenter
 
     public function __construct(Request $request,  Response $httpResponse){
         $this->request = $request;
-        $this->$httpResponse = $httpResponse;
+        $this->httpResponse = $httpResponse;
     }
     protected function startup(): void
     {
         parent::startup();
-        $authorizationHeader = $this->request->getHeader('Authorization');
-        if ($authorizationHeader === null) {
-            $this->redirect('Auth:default');
+        $token = $this->getHttpRequest()->getCookie('token');
+        if ($token) {
+            $this->httpResponse->addHeader('Authorization', 'Bearer ' . $token);
         }
-    }
-
-    // protected function authorizeUser($name)
-    // {
-    //     $row = $this->database->table('users')
-    //         ->where('login', $name)
-    //         ->select('token')
-    //         ->fetch();
-    //     $this->httpResponse->addHeader('Authorization', "Bearer {$token}");
-    // }
-    
+        // var_dump($this->httpResponse->getHeader('Authorization'));
+    }    
 }

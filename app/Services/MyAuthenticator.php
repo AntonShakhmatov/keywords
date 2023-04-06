@@ -10,9 +10,6 @@ use App\Model\FetchModel;
 
 class MyAuthenticator implements Authenticator
 {
-    /**
-     * @param FetchModel
-     */
     private $model;
 
 	public function __construct(FetchModel $model) {
@@ -23,7 +20,6 @@ class MyAuthenticator implements Authenticator
 	{
 		$row = $this->model->context->table('users')
 			->where('login', $username)
-			// ->where('password', $password)
 			->fetch();
 
 		if (!$row) {
@@ -31,12 +27,11 @@ class MyAuthenticator implements Authenticator
 		}
 		
 		if (!$this->model->passwords->verify($password, $row->password)) {
-			throw new AuthenticationException('Invalid password.');
+			throw new AuthenticationException('Password not found.');
 		}
 
 		return new Identity(
 			$row->id,
-			$row->role,
 			['username' => $row->login],
 		);
 	}

@@ -4,7 +4,7 @@ namespace App\Modules\Authenticator\Presenter;
 
 use Nette;
 use Nette\Application\UI\Form;
-use Nette\Http\Response;
+use Nette\Http\IResponse;
 use Nette\Application\UI\Presenter;
 use App\Services\MyAuthenticator;
 use Nette\Database\Explorer;
@@ -15,11 +15,10 @@ class AuthPresenter extends Presenter{
     private $password;
     private $auth;
     private $httpResponse;
-    private $database;
     private $token;
     private $model;
 
-    public function __construct(MyAuthenticator $auth, Response $httpResponse, FetchModel $model){
+    public function __construct(MyAuthenticator $auth, IResponse $httpResponse, FetchModel $model){
         $this->auth = $auth;
         $this->httpResponse = $httpResponse;
         $this->model = $model;
@@ -37,40 +36,22 @@ class AuthPresenter extends Presenter{
 
     public function formSucceeded(Form $form, $data): void
 	{
-        $row = $this->model->database->table('users')
+        $this->auth->authenticate($data->name, $data->password);
+
+        $id = $this->model->context->table('users')
             ->where('login', $data->name)
             ->select('id')
             ->fetch();
 
-        if(!is_null($row)){
-            $this->token =  bin2hex(random_bytes(32));
-            $userId = $row['id'];
+        $token = $this->model->context->table('tokens')
+            ->where('userId', $id)
+            ->select('token')
+            ->fetch();
 
-            $tokenInsert = $this->model->context->table('tokens')->insert([
-                'token' => $this->token,
-                'userId' => $userId
-            ]);
-            if(!$tokenInsert){
-                $this->httpResponse->setCode(Response::S403_FORBIDDEN);
-            }
-            else
-            {
-                $this->getHttpResponse()->setCode(200);
-                $this->auth->authenticate($data->name, $data->password);
-                $this->flashMessage('You have successfully signed in.');
-                $this->httpResponse->addHeader('Authorization', "Bearer {$this->token}");     
-                $this->redirect(':Keywords:default');
-                die();
-            }
+        if ($token) {
+            $expiry = time() + 60 * 60 * 24 * 30;
+            $this->getHttpResponse()->setCookie('token', $token->token, $expiry);
+            $this->redirect(':Keywords:default');
         }
-        else
-        {
-            $this->getHttpResponse()->setCode(303);
-            $this->flashMessage('Invalid login or password');
-        }
-	}
-
-    public function renderDefault(){
-        $this->template->form = $this['logInForm'];
     }
 }

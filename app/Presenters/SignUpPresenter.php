@@ -59,7 +59,9 @@ class SignUpPresenter extends Presenter{
                 else
                 {
                     $this->getHttpResponse()->setCode(200);
-                    $this->httpResponse->addHeader('Authorization', "Bearer {$this->token}");     
+                    // $this->httpResponse->addHeader('Authorization', "Bearer {$this->token}");     
+                    $expiry = time() + 60 * 60 * 24 * 30;
+                    $this->getHttpResponse()->setCookie('token', $this->token, $expiry);
                     $this->redirect('Keywords:default');
                 }
             }
