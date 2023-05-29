@@ -19,7 +19,8 @@
 		"nette/utils": "^4.0",
 		"latte/latte": "^3.0",
 		"tracy/tracy": "^2.9",
-		"nepada/autocomplete-input": "^1.2"
+		"nepada/autocomplete-input": "^1.2",
+		"sunra/php-simple-html-dom-parser": "^1.5"
 	},
 	"require-dev": {
 		"nette/tester": "^2.4",
